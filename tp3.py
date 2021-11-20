@@ -1,5 +1,5 @@
 
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QLineEdit
 from PyQt5 import uic
 import sqlite3
 
@@ -26,12 +26,12 @@ class MiVentana(QMainWindow):
         
         
     def on_nuevo(self):
-        if self.form.isVisible():
-            self.form.hide()
-            self.clear_inputs()
-        else:
-            self.form.show()
-            self.form.setEnabled(True)
+        self.form.show()
+        self.form.setEnabled(True)
+        self.clear_inputs()
+        self.confirm_panel.show()
+        self.set_readOnlyInputs(False)
+        
         
             
     def on_aceptar(self):
@@ -56,21 +56,26 @@ class MiVentana(QMainWindow):
         
     def on_item_clicked(self):
         self.confirm_panel.hide()
-        print(self.lista.currentItem().text())
         self.nombre.setText(self.lista.currentItem().text())
-        self.form.setReadOnly(True)
+        
+        
+        #encuentra todos los lineEdits en form
+        lineEdits = self.form.findChildren(QLineEdit)
+        for lineE in lineEdits:
+            lineE.setText(self.lista.currentItem().text())
+            lineE.setReadOnly(True)
+        
         
         
     def clear_inputs(self):
-        self.nombre.setText("")
-        self.apellido.setText("")
-        self.correo.setText("")
-        self.telefono.setText("")
-        self.direccion.setText("")
-        self.nacimiento.setText("")
-        self.altura.setText("")
-        self.peso.setText("")
+        lineEdits = self.form.findChildren(QLineEdit)
+        for line in lineEdits:
+            line.setText("")
         
+    def set_readOnlyInputs(self,boolean):
+        lineEdits = self.form.findChildren(QLineEdit)
+        for lineE in lineEdits:
+            lineE.setReadOnly(boolean)
         
         
         
