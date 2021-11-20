@@ -37,6 +37,8 @@ class MiVentana(QMainWindow):
         self.form.hide()
         self.confirm_panel_nuevo.hide()
         self.confirm_panel_edit.hide()
+        self.confirm_panel_delete.hide()
+        
         self.editar.setEnabled(False)
         self.eliminar.setEnabled(False)
         self.carga()
@@ -96,6 +98,7 @@ class MiVentana(QMainWindow):
     #funcionalidad para ver items
         
     def on_item_clicked(self):
+        #habilita los botones
         self.nuevo.setEnabled(True)
         self.eliminar.setEnabled(True)
         self.editar.setEnabled(True)
@@ -123,6 +126,7 @@ class MiVentana(QMainWindow):
     def on_editar(self):
         self.set_readOnlyInputs(False)
         self.confirm_panel_edit.show()
+        self.confirm_panel_nuevo.hide()
         self.nuevo.setEnabled(False)
         self.eliminar.setEnabled(False)
         
@@ -130,22 +134,27 @@ class MiVentana(QMainWindow):
         #info para la de los input
         nombre = self.nombre.text()
         apellido = self.apellido.text()
-        correo = self.correo.text()
+        mail = self.correo.text()
         telefono = self.telefono.text()
         direccion = self.direccion.text()
         nacimiento = self.nacimiento.text()
         altura = self.altura.text()
         peso = self.peso.text()
+        #encuenta el ususario en array
+        current_index= self.lista.currentRow()
+        current_user_id = self.usersArr[current_index]["id"]
         
-        lineEdits = self.form.findChildren(QLineEdit)
-        for lineE in lineEdits:
-            lineE.setText("editado")
+        self.cursor.execute(f"UPDATE usuarios SET nombre='{nombre}',apellido='{apellido}',mail='{mail}',telefono='{telefono}',direccion='{direccion}',nacimiento='{nacimiento}',altura='{altura}',peso='{peso}' WHERE id='{current_user_id}'")
+        self.conexion.commit()
+        #actualiza el nombre
+        self.lista.currentItem().setText(f"{nombre} {apellido}")
         
-        
-        # self.clear_inputs()
         #habilita los botones
         self.nuevo.setEnabled(True)
         self.eliminar.setEnabled(True)
+        self.set_readOnlyInputs(True)
+        self.confirm_panel_edit.hide()
+        
         
         
         
