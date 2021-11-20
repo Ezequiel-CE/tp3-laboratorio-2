@@ -1,5 +1,5 @@
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QApplication, QLineEdit,QMessageBox
 from PyQt5 import uic
 import sqlite3
 
@@ -12,10 +12,9 @@ class MiVentana(QMainWindow):
         #coneccion a base de datos
         self.conexion= sqlite3.connect("base3.db")
         self.cursor= self.conexion.cursor()
-        self.nuevo.clicked.connect(self.on_nuevo)
         #registro de usuarios
         self.usersArr = []
-        #orden ususarios
+        #orden usuarios
         self.order = 0
         self.lastID = 0
         #evento para los botones de nuevo
@@ -24,11 +23,11 @@ class MiVentana(QMainWindow):
         #evento para los botones de edit
         self.aceptar_edit.clicked.connect(self.on_aceptar_edit)
         self.cancelar_edit.clicked.connect(self.on_cancelar)
-        
-
-        
+        #botones de funcionalidades
+        self.nuevo.clicked.connect(self.on_nuevo)
         self.lista.itemClicked.connect(self.on_item_clicked)
         self.editar.clicked.connect(self.on_editar)
+        self.eliminar.clicked.connect(self.on_eliminar)
         
         
         self.init_state()
@@ -37,8 +36,6 @@ class MiVentana(QMainWindow):
         self.form.hide()
         self.confirm_panel_nuevo.hide()
         self.confirm_panel_edit.hide()
-        self.confirm_panel_delete.hide()
-        
         self.editar.setEnabled(False)
         self.eliminar.setEnabled(False)
         self.carga()
@@ -155,8 +152,42 @@ class MiVentana(QMainWindow):
         self.set_readOnlyInputs(True)
         self.confirm_panel_edit.hide()
         
+    #funcionalidad para eliminar
+    
+    def on_eliminar(self):
+        self.confirm_panel_nuevo.hide()
+        self.confirm_panel_edit.hide()
+        item_actual=self.lista.currentItem()
+        #crea mensaje
+        msg = QMessageBox()
+        msg.setWindowTitle("Elimar usuario")
+        msg.setText(f"Realmente desea eliminar a {item_actual.text()}")
+        msg.setIcon(QMessageBox.Question)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No )
+        resultado = msg.exec()
+        #toma de decisiones segun resultado
+        if resultado == QMessageBox.Yes:
+            #encuentra al usuario
+            current_index= self.lista.currentRow()
+            current_user= self.usersArr[current_index]
+            current_user_index = current_user["id"]
+            self.cursor.execute(f"DELETE FROM usuarios WHERE id='{current_user_index}'")
+            self.conexion.commit()
+            self.lista.takeItem(self.lista.currentRow())
+            #elimina el ususario del arr
+            self.usersArr.remove(current_user)
+            self.form.hide()
+            self.editar.setEnabled(False)
+            self.eliminar.setEnabled(False)
+            print(current_user)
+            
+        if resultado == QMessageBox.No:
+            print("nada")
         
         
+        
+        
+    
         
     #funcionalidades auxiliares
     
