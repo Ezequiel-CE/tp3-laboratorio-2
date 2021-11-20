@@ -10,9 +10,13 @@ class MiVentana(QMainWindow):
         super().__init__()
         uic.loadUi("base.ui", self)
         #coneccion a base de datos
-        # self.conexion= sqlite3.connect("base3.db")
-        # self.cursor= self.conexion.cursor()
+        self.conexion= sqlite3.connect("base3.db")
+        self.cursor= self.conexion.cursor()
         self.nuevo.clicked.connect(self.on_nuevo)
+        #registro de usuarios
+        self.usersArr = []
+        #orden ususarios
+        self.order = 0
         #evento para los botones de nuevo
         self.aceptar_nuevo.clicked.connect(self.on_aceptar_nuevo)
         self.cancelar_nuevo.clicked.connect(self.on_cancelar)
@@ -32,9 +36,21 @@ class MiVentana(QMainWindow):
         self.form.hide()
         self.confirm_panel_nuevo.hide()
         self.confirm_panel_edit.hide()
-        self.form.setEnabled(False)
         self.editar.setEnabled(False)
         self.eliminar.setEnabled(False)
+        self.carga()
+        print(self.usersArr)
+        
+    def carga(self):
+        self.cursor.execute("select * from usuarios")
+        usuarios = self.cursor.fetchall()
+        #guarda cada usuario en un diccionario y lo empuja a un array
+        for idN,nombre,apellido,mail,telefono,direccion,nacimiento,altura,peso in usuarios:
+            user={"order": self.order,"id":idN,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
+            self.usersArr.append(user)
+            self.lista.addItem(f"{nombre} {apellido}")
+            #aumenta el orden
+            self.order += 1
         
         
     def on_nuevo(self):
@@ -59,9 +75,12 @@ class MiVentana(QMainWindow):
         altura = self.altura.text()
         peso = self.peso.text()
         
+        self.cursor.execute(f"INSERT INTO usuarios(nombre,apellido,mail,telefono,direccion,nacimiento,altura,peso) VALUES ('{nombre}','{apellido}','{correo}','{telefono}','{direccion}','{nacimiento}','{altura}','{peso}')")
+        self.conexion.commit()
         self.lista.addItem(f"{nombre} {apellido}")
         self.clear_inputs()
         #habilita los botones
+        self.confirm_panel_nuevo.hide()
         self.editar.setEnabled(True)
         self.eliminar.setEnabled(True)
         
@@ -71,13 +90,27 @@ class MiVentana(QMainWindow):
     #funcionalidad para ver items
         
     def on_item_clicked(self):
+        self.nuevo.setEnabled(True)
+        self.eliminar.setEnabled(True)
+        self.editar.setEnabled(True)
+        
+        self.form.show()
         self.confirm_panel_nuevo.hide()
-        self.nombre.setText(self.lista.currentItem().text())
-        #encuentra todos los lineEdits en form
-        lineEdits = self.form.findChildren(QLineEdit)
-        for lineE in lineEdits:
-            lineE.setText(self.lista.currentItem().text())
+        current_index= self.lista.currentRow()
+        current_user = self.usersArr[current_index]
+        self.fill_user(current_user)
         self.set_readOnlyInputs(True)
+        
+    def fill_user(self,diccionario):
+        self.nombre.setText(diccionario["nombre"])
+        self.apellido.setText(diccionario["apellido"])
+        self.correo.setText(diccionario["mail"])
+        self.telefono.setText(diccionario["telefono"])
+        self.direccion.setText(diccionario["direccion"])
+        self.nacimiento.setText(diccionario["nacimiento"])
+        self.altura.setText(str(diccionario["altura"]))
+        self.peso.setText(str(diccionario["peso"]))
+        
     
     #funcionalidad para editar
     
