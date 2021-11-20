@@ -17,6 +17,7 @@ class MiVentana(QMainWindow):
         self.usersArr = []
         #orden ususarios
         self.order = 0
+        self.lastID = 0
         #evento para los botones de nuevo
         self.aceptar_nuevo.clicked.connect(self.on_aceptar_nuevo)
         self.cancelar_nuevo.clicked.connect(self.on_cancelar)
@@ -39,7 +40,7 @@ class MiVentana(QMainWindow):
         self.editar.setEnabled(False)
         self.eliminar.setEnabled(False)
         self.carga()
-        print(self.usersArr)
+        
         
     def carga(self):
         self.cursor.execute("select * from usuarios")
@@ -51,6 +52,8 @@ class MiVentana(QMainWindow):
             self.lista.addItem(f"{nombre} {apellido}")
             #aumenta el orden
             self.order += 1
+            self.lastID = idN
+            print(user)
         
         
     def on_nuevo(self):
@@ -68,16 +71,19 @@ class MiVentana(QMainWindow):
         #info para la database
         nombre = self.nombre.text()
         apellido = self.apellido.text()
-        correo = self.correo.text()
+        mail = self.correo.text()
         telefono = self.telefono.text()
         direccion = self.direccion.text()
         nacimiento = self.nacimiento.text()
         altura = self.altura.text()
         peso = self.peso.text()
         
-        self.cursor.execute(f"INSERT INTO usuarios(nombre,apellido,mail,telefono,direccion,nacimiento,altura,peso) VALUES ('{nombre}','{apellido}','{correo}','{telefono}','{direccion}','{nacimiento}','{altura}','{peso}')")
+        self.cursor.execute(f"INSERT INTO usuarios(nombre,apellido,mail,telefono,direccion,nacimiento,altura,peso) VALUES ('{nombre}','{apellido}','{mail}','{telefono}','{direccion}','{nacimiento}','{altura}','{peso}')")
         self.conexion.commit()
         self.lista.addItem(f"{nombre} {apellido}")
+        user={"order": self.order,"id":self.lastID+1,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
+        self.usersArr.append(user)
+        print(user)
         self.clear_inputs()
         #habilita los botones
         self.confirm_panel_nuevo.hide()
