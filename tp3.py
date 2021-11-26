@@ -10,13 +10,12 @@ class MiVentana(QMainWindow):
         super().__init__()
         uic.loadUi("base.ui", self)
         #coneccion a base de datos
-        self.conexion= sqlite3.connect("base3.db")
+        self.conexion= sqlite3.connect("baseprueba.db")
         self.cursor= self.conexion.cursor()
         #registro de usuarios
         self.usersArr = []
-        #orden usuarios
-        self.order = 0
-        self.lastID = 0
+        #usuario actual
+        self.currentUser = ""
         #evento para los botones de nuevo
         self.aceptar_nuevo.clicked.connect(self.on_aceptar_nuevo)
         self.cancelar_nuevo.clicked.connect(self.on_cancelar_nuevo)
@@ -44,14 +43,14 @@ class MiVentana(QMainWindow):
     def carga(self):
         self.cursor.execute("select * from usuarios")
         usuarios = self.cursor.fetchall()
+        #no hace nada si esta vacio la base de datos
+        if(len(usuarios) < 1): return
         #guarda cada usuario en un diccionario y lo empuja a un array
         for idN,nombre,apellido,mail,telefono,direccion,nacimiento,altura,peso in usuarios:
-            user={"order": self.order,"id":idN,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
+            user={"id":idN,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
             self.usersArr.append(user)
             self.lista.addItem(f"{nombre} {apellido}")
-            #aumenta el orden
-            self.order += 1
-            self.lastID = idN
+            
             
     #funcionalidad para nuevo
         
@@ -80,7 +79,8 @@ class MiVentana(QMainWindow):
         self.cursor.execute(f"INSERT INTO usuarios(nombre,apellido,mail,telefono,direccion,nacimiento,altura,peso) VALUES ('{nombre}','{apellido}','{mail}','{telefono}','{direccion}','{nacimiento}','{altura}','{peso}')")
         self.conexion.commit()
         self.lista.addItem(f"{nombre} {apellido}")
-        user={"order": self.order,"id":self.lastID+1,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
+        user={"id":self.cursor.lastrowid,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
+        #self.cursor.lastrowid debuelve el ultimo id insertado
         self.usersArr.append(user)
         print(user)
         self.clear_inputs()
@@ -107,8 +107,8 @@ class MiVentana(QMainWindow):
         self.form.show()
         self.confirm_panel_nuevo.hide()
         current_index= self.lista.currentRow()
-        current_user = self.usersArr[current_index]
-        self.fill_user(current_user)
+        self.current_user = self.usersArr[current_index]
+        self.fill_user(self.current_user)
         self.set_readOnlyInputs(True)
         
     def fill_user(self,diccionario):
@@ -142,12 +142,11 @@ class MiVentana(QMainWindow):
         altura = self.altura.text()
         peso = self.peso.text()
         #encuenta el ususario en array y lo edita
+        user_editado={"id":self.current_user["id"],"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
         current_index= self.lista.currentRow()
-        current_user = self.usersArr[current_index]
-        current_user_id = self.usersArr[current_index]["id"]
-        user_editado={"order": current_user["order"],"id":current_user_id,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
         self.usersArr[current_index]= user_editado
         #actualiza la base de datos
+        current_user_id = self.current_user["id"]
         self.cursor.execute(f"UPDATE usuarios SET nombre='{nombre}',apellido='{apellido}',mail='{mail}',telefono='{telefono}',direccion='{direccion}',nacimiento='{nacimiento}',altura='{altura}',peso='{peso}' WHERE id='{current_user_id}'")
         self.conexion.commit()
         #actualiza el nombre
@@ -187,14 +186,12 @@ class MiVentana(QMainWindow):
         #toma de decisiones segun resultado
         if resultado == QMessageBox.Yes:
             #encuentra al usuario
-            current_index= self.lista.currentRow()
-            current_user= self.usersArr[current_index]
-            current_user_index = current_user["id"]
+            current_user_index = self.current_user["id"]
             self.cursor.execute(f"DELETE FROM usuarios WHERE id='{current_user_index}'")
             self.conexion.commit()
             self.lista.takeItem(self.lista.currentRow())
             #elimina el ususario del arr
-            self.usersArr.remove(current_user)
+            self.usersArr.remove(self.current_user)
             self.form.hide()
             self.editar.setEnabled(False)
             self.eliminar.setEnabled(False)
