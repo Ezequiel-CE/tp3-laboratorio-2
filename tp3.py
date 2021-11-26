@@ -19,10 +19,10 @@ class MiVentana(QMainWindow):
         self.lastID = 0
         #evento para los botones de nuevo
         self.aceptar_nuevo.clicked.connect(self.on_aceptar_nuevo)
-        self.cancelar_nuevo.clicked.connect(self.on_cancelar)
+        self.cancelar_nuevo.clicked.connect(self.on_cancelar_nuevo)
         #evento para los botones de edit
         self.aceptar_edit.clicked.connect(self.on_aceptar_edit)
-        self.cancelar_edit.clicked.connect(self.on_cancelar)
+        self.cancelar_edit.clicked.connect(self.on_cancelar_edit)
         #botones de funcionalidades
         self.nuevo.clicked.connect(self.on_nuevo)
         self.lista.itemClicked.connect(self.on_item_clicked)
@@ -65,7 +65,7 @@ class MiVentana(QMainWindow):
         
         
         
-            
+        
     def on_aceptar_nuevo(self):
         #info para la database
         nombre = self.nombre.text()
@@ -89,8 +89,12 @@ class MiVentana(QMainWindow):
         self.editar.setEnabled(True)
         self.eliminar.setEnabled(True)
         
-    def on_cancelar(self):
+    def on_cancelar_nuevo(self):
         self.clear_inputs()
+        self.set_readOnlyInputs(True)
+        self.form.hide()
+        self.editar.setEnabled(False)
+        self.eliminar.setEnabled(False)
     
     #funcionalidad para ver items
         
@@ -137,10 +141,13 @@ class MiVentana(QMainWindow):
         nacimiento = self.nacimiento.text()
         altura = self.altura.text()
         peso = self.peso.text()
-        #encuenta el ususario en array
+        #encuenta el ususario en array y lo edita
         current_index= self.lista.currentRow()
+        current_user = self.usersArr[current_index]
         current_user_id = self.usersArr[current_index]["id"]
-        
+        user_editado={"order": current_user["order"],"id":current_user_id,"nombre":nombre,"apellido":apellido,"mail":mail,"telefono":telefono,"direccion":direccion,"nacimiento":nacimiento,"altura":altura,"peso":peso}
+        self.usersArr[current_index]= user_editado
+        #actualiza la base de datos
         self.cursor.execute(f"UPDATE usuarios SET nombre='{nombre}',apellido='{apellido}',mail='{mail}',telefono='{telefono}',direccion='{direccion}',nacimiento='{nacimiento}',altura='{altura}',peso='{peso}' WHERE id='{current_user_id}'")
         self.conexion.commit()
         #actualiza el nombre
@@ -151,6 +158,13 @@ class MiVentana(QMainWindow):
         self.eliminar.setEnabled(True)
         self.set_readOnlyInputs(True)
         self.confirm_panel_edit.hide()
+    
+    def on_cancelar_edit(self):
+        self.set_readOnlyInputs(True)
+        self.confirm_panel_edit.hide()
+        self.confirm_panel_nuevo.hide()
+        self.nuevo.setEnabled(True)
+        self.eliminar.setEnabled(True)
         
     #funcionalidad para eliminar
     
@@ -179,7 +193,7 @@ class MiVentana(QMainWindow):
             self.form.hide()
             self.editar.setEnabled(False)
             self.eliminar.setEnabled(False)
-            print(current_user)
+            
             
         if resultado == QMessageBox.No:
             print("nada")
