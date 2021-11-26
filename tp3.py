@@ -52,8 +52,8 @@ class MiVentana(QMainWindow):
             #aumenta el orden
             self.order += 1
             self.lastID = idN
-            print(user)
-        
+            
+    #funcionalidad para nuevo
         
     def on_nuevo(self):
         self.form.show()
@@ -193,10 +193,8 @@ class MiVentana(QMainWindow):
             self.form.hide()
             self.editar.setEnabled(False)
             self.eliminar.setEnabled(False)
-            
-            
         if resultado == QMessageBox.No:
-            print("nada")
+            pass
         
         
         
