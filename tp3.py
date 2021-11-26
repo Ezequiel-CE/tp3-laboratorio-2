@@ -10,7 +10,7 @@ class MiVentana(QMainWindow):
         super().__init__()
         uic.loadUi("base.ui", self)
         #coneccion a base de datos
-        self.conexion= sqlite3.connect("baseprueba.db")
+        self.conexion= sqlite3.connect("base3.db")
         self.cursor= self.conexion.cursor()
         #registro de usuarios
         self.usersArr = []
@@ -29,7 +29,11 @@ class MiVentana(QMainWindow):
         self.eliminar.clicked.connect(self.on_eliminar)
         
         
+        
         self.init_state()
+        
+   
+        
         
     def init_state(self):
         self.form.hide()
@@ -61,6 +65,8 @@ class MiVentana(QMainWindow):
         self.confirm_panel_nuevo.show()
         self.set_readOnlyInputs(False)
         self.confirm_panel_edit.hide()
+        self.editar.setEnabled(False)
+        self.eliminar.setEnabled(False)
         
         
         
@@ -88,6 +94,10 @@ class MiVentana(QMainWindow):
         self.confirm_panel_nuevo.hide()
         self.editar.setEnabled(True)
         self.eliminar.setEnabled(True)
+        #pone focus en el recien agregado
+        self.lista.item(self.lista.count()-1).setSelected(True)
+        self.fill_user(user)
+        self.set_readOnlyInputs(True)
         
     def on_cancelar_nuevo(self):
         self.clear_inputs()
@@ -130,6 +140,8 @@ class MiVentana(QMainWindow):
         self.confirm_panel_nuevo.hide()
         self.nuevo.setEnabled(False)
         self.eliminar.setEnabled(False)
+        self.editar.setEnabled(False)
+        
         
     def on_aceptar_edit(self):
         #info para la de los input
