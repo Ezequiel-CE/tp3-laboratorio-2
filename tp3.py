@@ -167,6 +167,7 @@ class MiVentana(QMainWindow):
         #habilita los botones
         self.nuevo.setEnabled(True)
         self.eliminar.setEnabled(True)
+        self.editar.setEnabled(True)        
         self.set_readOnlyInputs(True)
         self.confirm_panel_edit.hide()
     

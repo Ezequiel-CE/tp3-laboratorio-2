@@ -122,7 +122,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.lista.setToolTip(_translate("MainWindow", "<html><head/><body><p align=\"center\"><br/></p></body></html>"))
+        self.lista.setToolTip(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
         self.label.setText(_translate("MainWindow", "Nombre"))
         self.label_3.setText(_translate("MainWindow", "Apellido"))
         self.label_2.setText(_translate("MainWindow", "Correo electronico"))
