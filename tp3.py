@@ -165,6 +165,11 @@ class MiVentana(QMainWindow):
         self.confirm_panel_nuevo.hide()
         self.nuevo.setEnabled(True)
         self.eliminar.setEnabled(True)
+        #coloca los valores nuevamente
+        current_index= self.lista.currentRow()
+        current_user = self.usersArr[current_index]
+        self.fill_user(current_user)
+        
         
     #funcionalidad para eliminar
     
